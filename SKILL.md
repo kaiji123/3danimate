@@ -113,7 +113,7 @@ All clips target the Quaternius rig (71 bones, UE-style names such as `pelvis`,
 
 The template still contains a full pipeline for vertical narrated "true story"
 shorts. Use it only when the user asks for one: `ShortVideo`, word-timed cuts
-(`Shots`, `wordFrame`), captions, pop-ups, photo-mosaic faces from AI portraits,
+(`Shots`, `wordFrame`), captions, pop-ups, photo-mosaic faces from portraits you have the rights to,
 synthesized music/SFX and a VHS look. Its pieces:
 - `scripts/generate_audio.py` (edge-tts>=7.3), `scripts/generate_sfx.py`,
   `scripts/process_faces.py`, `scripts/commons_refs.py`

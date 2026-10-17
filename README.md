@@ -89,7 +89,19 @@ templates/      the Remotion project the scaffold copies
 media/          README demo assets
 ```
 
-## Licences
+## Credits and licences
 
-ActionForge / Quaternius clips and the rig are **CC0**. Run
-`fetch_actionforge.py list` to check the licence of each clip.
+- **Animations and rig:** created by [Quaternius](https://quaternius.com) and
+  dedicated to the public domain ([CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)).
+  If they're useful to you, consider supporting him on
+  [Patreon](https://www.patreon.com/quaternius).
+- **Retargeting and hosting:** the clips are fetched from the CC0 library of
+  [ActionForge](https://actionforge.app) by CGstuff, which retargets and hosts
+  them under the same CC0 terms. `fetch_actionforge.py` downloads only those
+  CC0 asset files. It skips files you already have and spaces out requests, so
+  please fetch only the clips you use. ActionForge's app code is proprietary and
+  is not used or copied here.
+- This project is **not affiliated with or endorsed by** Quaternius or ActionForge.
+- Optional story extras: face portraits and reference photos are yours to
+  source. Use only images you have the rights to, and log them in the
+  `SOURCES.txt` files.

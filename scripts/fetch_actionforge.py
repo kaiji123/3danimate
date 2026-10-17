@@ -12,7 +12,13 @@ Usage:
   python fetch_actionforge.py manifest OUT_FILE           # save the raw catalog
 
 `get` always downloads rig-human.glb too. Clip names are the manifest keys
-(walk_formal_loop, sitting_idle_loop, interact, ...).
+(walk_formal_loop, sitting_idle_loop, interact, ...). Files already in OUT_DIR
+are skipped (pass --force to re-download), and requests are spaced out: this
+fetches from ActionForge's own hosting, so keep the load on it small.
+
+Credits: animations and rig by Quaternius (https://quaternius.com), CC0;
+retargeted and hosted by ActionForge (CGstuff). This project is not affiliated
+with either. Only the CC0 assets are fetched; ActionForge's app code is not.
 """
 import json
 import sys
@@ -22,7 +28,8 @@ from pathlib import Path
 
 BASE = "https://actionforge.app/assets/animation-library"
 MANIFEST = f"{BASE}/manifests/library.json"
-UA = {"User-Agent": "3d-animate-skill/1.0"}
+UA = {"User-Agent": "3d-animate-skill/1.0 (+https://github.com/kaiji123/3danimate)"}
+DELAY = 1.0  # seconds between downloads
 
 
 def fetch(url: str) -> bytes:
@@ -74,22 +81,26 @@ def cmd_list(args):
               f"{dist:6.2f}  {lic:7}  {tags}")
 
 
-def save(url_path: str, out: Path):
+def save(url_path: str, out: Path, force: bool = False):
+    if out.exists() and out.stat().st_size > 0 and not force:
+        print(f"  {out}  (cached)")
+        return
     data = fetch(f"{BASE}/{url_path}")
     out.write_bytes(data)
     print(f"  {out}  ({len(data) // 1024} KB)")
 
 
 def cmd_get(args):
+    force = "--force" in args
+    args = [a for a in args if a != "--force"]
     if len(args) < 1:
-        sys.exit("usage: get OUT_DIR clip [clip ...]")
+        sys.exit("usage: get OUT_DIR clip [clip ...] [--force]")
     out_dir = Path(args[0])
     out_dir.mkdir(parents=True, exist_ok=True)
     m = manifest()
     cat = clips(m)
     rig = out_dir / "rig-human.glb"
-    if not rig.exists():
-        save(rig_file(m), rig)
+    save(rig_file(m), rig, force)
     missing = [n for n in args[1:] if n not in cat]
     if missing:
         sys.exit(f"unknown clip(s): {', '.join(missing)}  (run `list` to see names)")
@@ -97,8 +108,11 @@ def cmd_get(args):
         lic = (cat[name].get("source") or {}).get("license")
         if lic != "CC0":
             print(f"  WARNING {name}: licence is {lic!r}, not CC0", file=sys.stderr)
-        save(cat[name]["file"], out_dir / f"{name}.glb")
-        time.sleep(0.3)
+        out = out_dir / f"{name}.glb"
+        cached = out.exists() and not force
+        save(cat[name]["file"], out, force)
+        if not cached:
+            time.sleep(DELAY)
 
 
 def cmd_manifest(args):

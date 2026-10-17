@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""AI portraits -> low-poly photo-mosaic face textures for the 3D heads.
+"""Portraits -> low-poly photo-mosaic face textures for the 3D heads.
 
-Source portraits: https://thispersondoesnotexist.com/random-person.jpeg?r=N
-(the bare URL returns an HTML page). They are FFHQ-aligned 1024x1024 images of
-nobody, so one fixed crop works for all of them and they are safe to cast as
-real people.
+Source portraits: front-facing 1024x1024 images, FFHQ-style aligned (face
+centred, eyes ~40 % down), so one fixed crop works for all of them. Use only
+portraits you have the rights to: a consenting person's photo, or an
+AI-generated face whose generator terms allow your use. Log each source in
+assets/faces-src/SOURCES.txt.
 
 Run from the project root:  python scripts/process_faces.py [name ...]
 Reads   assets/faces-src/<name>.jpg  and  assets/faces-src/faces.json

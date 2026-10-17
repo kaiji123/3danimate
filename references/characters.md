@@ -1,13 +1,14 @@
 # Characters: mocap bodies, photo-mosaic faces
 
 ## Faces (`scripts/process_faces.py`)
-1. **Source**: AI portraits of nobody from
-   `https://thispersondoesnotexist.com/random-person.jpeg?r=N` (the bare URL
-   returns an HTML page). Vary `N`, pause between downloads, and pick faces
-   that broadly fit each role (age, build). Save them as `assets/faces-src/<role>.jpg`.
-   ```bash
-   curl -sL -A "Mozilla/5.0" "https://thispersondoesnotexist.com/random-person.jpeg?r=17" -o assets/faces-src/dealer.jpg
-   ```
+1. **Source**: front-facing, head-and-shoulders portraits **you have the rights
+   to use**: a photo of someone who has consented, or an AI-generated face from a
+   generator whose terms allow your use (check them; commercial use is often
+   restricted). Never use a real person's photo without consent, and never put a
+   real, identifiable person's face on a character they aren't. Save them as
+   `assets/faces-src/<role>.jpg`, 1024×1024 with the face centred and the eyes
+   about 40 % down (FFHQ-style alignment, which the fixed crop below assumes).
+   Record where each one came from in `assets/faces-src/SOURCES.txt`.
 2. **Hair colour by hand** in `assets/faces-src/faces.json`
    (`{"dealer": {"hair": "#3b2a20"}}`). Auto-sampling is a fallback and often
    picks skin or backdrop. `skin` is sampled from the cheeks unless you set it.
@@ -57,10 +58,11 @@ Then add each name to `CLIP_NAMES`. Useful clips for story shorts:
 `pickup_table`, `chest_open`, `fixing_kneeling`, `consume`, `driving_loop`,
 `push_loop`, `climbup_1m`, `hit_chest`, `death01`, `farm_watering`, `treechopping_loop`.
 
-(The catalog is `https://actionforge.app/assets/animation-library/manifests/library.json`.
-The same trick works for other browser-only asset tools: load the page in a
-headless browser, log the `.json`/`.glb` requests, and find the manifest the
-app itself fetches.)
+The clips and rig are by Quaternius (CC0), retargeted and hosted by ActionForge.
+`fetch_actionforge.py` downloads only those CC0 files, skips files you already
+have, and spaces out its requests. Don't bulk-mirror the library or hammer the
+host; fetch the clips a project actually uses. This project is not affiliated
+with ActionForge or Quaternius.
 
 ### How it becomes a person
 - **Clothes by bone weight**: each triangle is coloured by the body region of its
