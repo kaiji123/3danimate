@@ -1,0 +1,10 @@
+{
+  "voice": "en-US-AndrewNeural",
+  "rate": "+12%",
+  "fps": 30,
+  "scenes": [
+    { "id": "ex-hook", "text": "Can a man walk into a bank with nothing but a question, and walk out with a fortune?" },
+    { "id": "ex-desk", "text": "In 1994, a clerk named Paul noticed something odd. The machine paid out twice." },
+    { "id": "ex-end", "text": "He never told anyone. Until now." }
+  ]
+}
