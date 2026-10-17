@@ -1,93 +1,95 @@
 # 3d-animate
 
-An agent skill for making fully generated **low-poly 3D story shorts**
-(vertical 1080×1920, ~60 s) with Remotion + three.js / react-three-fiber.
-Narration, word-timed hard cuts, mocap-animated characters with photo-mosaic
-faces, captions, pop-ups, synthesized music/SFX and an optional VHS look —
-no stock footage, nothing to license.
+An agent skill for animating rigged humanoids in 3D with Remotion +
+three.js / react-three-fiber. Point it at a humanoid rig and a set of mocap
+clips, and it plays, blends and renders them frame-accurately.
 
 ## Demo
 
-<table>
-  <tr>
-    <td align="center" valign="top">
-      <img src="media/demo-short.gif" width="270" alt="Example short rendered by the skill"><br>
-      <sub>The template's example video, rendered as-is<br>(<a href="media/demo-short.mp4">MP4 with sound</a>)</sub>
-    </td>
-    <td align="center" valign="top">
-      <img src="media/demo-closeup.gif" width="360" alt="Cuts, pop-ups and VHS glitches keyed to narration"><br>
-      <sub>Hard cuts land on narration words; pop-ups (<code>x2</code>),<br>captions and VHS cut-glitches are timed from the TTS word boundaries</sub>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <img src="media/clip-grid.gif" width="540" alt="One mannequin rig playing nine different mocap clips">
+  <img src="media/clip-chain.gif" width="400" alt="A mannequin cross-fading through a chain of clips">
+</p>
 
-**Faces:** an AI-generated portrait (no real person) → low-poly mosaic
-texture → head on a mocap-animated character.
-
-<img src="media/face-pipeline.png" width="640" alt="AI portrait to low-poly face texture to in-scene character">
-
-Everything above was produced by the skill's own pipeline: `scaffold.py` →
-`fetch_actionforge.py` (CC0 clips) → `process_faces.py` → `generate_audio.py`
-(edge-tts) → `generate_sfx.py` → `remotion render`. A full short follows the
-same steps with a longer script (150–170 words, 7–10 scenes).
+<p align="center"><sub>
+Left: one rig, nine CC0 clips (walk, jog, dance, punch, sword, pistol, crouch, talk, zombie walk).<br>
+Right: the same rig chaining clips with 10-frame cross-fades: idle → walk → jog → dance → punch → sword → idle.
+</sub></p>
 
 ## What it does
 
-- **Word-timed editing** — scenes ask `wordFrame("desk", "twice")` instead of
-  hard-coding seconds; re-recording the narration re-times every cut.
-- **Mocap characters** — CC0 Quaternius/ActionForge clips on a low-poly
-  mannequin, clothed by bone weight, driven deterministically per frame.
-- **Photo-mosaic faces** with runtime expressions (open mouth, frown, closed
-  eyes, angry brows).
-- **Canonical props** modelled once from Wikimedia Commons reference photos,
-  verified on a model-sheet composition.
-- **Look & sound** — captions, pop-ups, stamps, name tags, VHS filter + OSD,
-  numpy-synthesized music bed and SFX.
-- **Visual QA loop** — `stills.mjs` renders frames by scene id and tiles a
-  contact sheet; `references/qa.md` maps symptoms to fixes.
+- **Any clip on one rig.** It plays CC0 mocap clips from the
+  [ActionForge](https://actionforge.app) / Quaternius library (89 clips: locomotion,
+  combat, interaction, gestures, reactions) on a 71-bone humanoid rig.
+- **Deterministic playback.** No clocks. Every frame sets each action's time and
+  weight, then evaluates the pose (`mixer.update(0)`), so renders are
+  reproducible and can be scrubbed.
+- **Blending.** `layers` takes `{clip, t, weight}` entries. Cross-fade
+  weights to chain clips (walk → sit) or mix them.
+- **Root motion.** Clips play in place, or `travel` moves the character by
+  the clip's own velocity so the feet don't slide.
+- **Attachments.** Props can ride on any bone (hands, head, chest).
+- **Custom clips.** For moves the library doesn't have, it can capture motion from
+  video, retarget it onto the rig, and clean it up
+  ([`references/custom-capture.md`](references/custom-capture.md)).
+- **Visual QA.** `stills.mjs` renders chosen frames and tiles a contact sheet,
+  and the `ClipGrid` composition checks a rig and its clips before anything is built on them.
 
 ## Install
 
-Clone this repo into your agent's skills directory, e.g. for Claude Code:
+Clone this repo into your agent's skills directory. For example, for Claude Code:
 
 ```bash
-git clone <this-repo-url> ~/.claude/skills/3d-animate
+git clone https://github.com/kaiji123/3danimate.git ~/.claude/skills/3d-animate
 ```
 
-Requirements: Node 18+, Python 3.10+, `ffmpeg`/`ffprobe` on PATH.
-
-```bash
-pip install "edge-tts>=7.3" numpy scipy pillow
-```
-
-> Make sure `edge-tts` is installed for the same Python that runs the scripts —
-> older versions get HTTP 403 from the TTS endpoint.
+Requirements: Node 18+ and Python 3.10+. Remotion downloads its own headless
+Chrome on the first render.
 
 ## Usage
 
-Ask your agent for a video, e.g. *"Make a 60-second low-poly short about the
-Antwerp diamond heist."* The skill's [`SKILL.md`](SKILL.md) walks
-the agent through scaffolding, story, voice, casting, clips, props, scenes, QA
-and the final render.
+Ask your agent, for example: *"Animate a mannequin doing a walk, then a punch, and
+render it to MP4."* [`SKILL.md`](SKILL.md) walks the agent through
+scaffolding a project, fetching clips, driving them and rendering.
 
-To try the example by hand:
+By hand:
 
 ```bash
-python ~/.claude/skills/3d-animate/scripts/scaffold.py my-short && cd my-short && npm install
-python scripts/fetch_actionforge.py get public/anims idle_loop idle_talking_loop walk_formal_loop sitting_idle_loop yes interact
-# put an AI-generated portrait at assets/faces-src/clerk.jpg, then:
-python scripts/process_faces.py
-python scripts/generate_audio.py example
-python scripts/generate_sfx.py
-npx remotion render src/index.ts Example out/example.mp4
+python ~/.claude/skills/3d-animate/scripts/scaffold.py my-anim && cd my-anim && npm install
+python scripts/fetch_actionforge.py list                       # browse clips (all CC0)
+python scripts/fetch_actionforge.py get public/anims idle_loop walk_loop jog_fwd_loop dance_loop \
+  punch_cross sword_attack pistol_shoot crouch_fwd_loop idle_talking_loop zombie_walk_fwd_loop
+npx remotion render src/index.ts ClipChain out/clip-chain.mp4   # or ClipGrid
+```
+
+New clips go in `public/anims/` and in `CLIP_NAMES` (`src/three/assets.ts`).
+
+Driving a clip in a scene:
+
+```tsx
+import { Mannequin } from "./three/Mannequin";
+
+const s = useSecs();                                   // seconds since the shot started
+<Mannequin layers={[{ clip: "walk_loop", t: s }]} />
+
+// cross-fade walk → punch (w goes 0 → 1 over ~10 frames)
+<Mannequin layers={[
+  { clip: "walk_loop",   t: s, weight: 1 - w },
+  { clip: "punch_cross", t: s, weight: w },
+]} />
 ```
 
 ## Repo layout
 
 ```
 SKILL.md        workflow + hard rules (entry point for the agent)
-references/     story & timing, characters, props, look & sound, QA, custom capture
-scripts/        scaffold, audio, sfx, faces, ActionForge, Commons refs, contact sheet
+references/     characters & clips, custom capture, look, QA
+scripts/        scaffold, ActionForge clip fetcher, contact sheet, helpers
 templates/      the Remotion project the scaffold copies
 media/          README demo assets
 ```
+
+## Licences
+
+ActionForge / Quaternius clips and the rig are **CC0**. Run
+`fetch_actionforge.py list` to check the licence of each clip.

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "studio": "remotion studio src/index.ts",
-    "build": "remotion render src/index.ts Example out/example.mp4",
+    "build": "remotion render src/index.ts ClipChain out/clip-chain.mp4",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -10,17 +10,22 @@ import { GLTFLoader, type GLTF } from "three/examples/jsm/loaders/GLTFLoader.js"
 /** Every clip in public/anims/ that a scene uses (library clips + custom `cap_` clips). */
 export const CLIP_NAMES = [
   "idle_loop",
+  "walk_loop",
+  "jog_fwd_loop",
+  "dance_loop",
+  "punch_cross",
+  "sword_attack",
+  "pistol_shoot",
+  "crouch_fwd_loop",
   "idle_talking_loop",
-  "walk_formal_loop",
-  "sitting_idle_loop",
-  "yes",
-  "interact",
+  "zombie_walk_fwd_loop",
 ] as const;
 export type ClipName = (typeof CLIP_NAMES)[number];
 
-/** Every face texture in public/faces/ (from scripts/process_faces.py). */
-export const FACE_NAMES = ["clerk"] as const;
-export type FaceName = (typeof FACE_NAMES)[number];
+/** Face textures in public/faces/ (from scripts/process_faces.py). Only needed
+ *  for Actor's photo-mosaic heads; the plain Mannequin uses none. */
+export const FACE_NAMES: readonly string[] = [];
+export type FaceName = string;
 
 /** Other images (reference photos for the model sheet, signs, ...). */
 export const IMAGE_FILES: string[] = [];
