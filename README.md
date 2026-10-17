@@ -105,3 +105,5 @@ media/          README demo assets
 - Optional story extras: face portraits and reference photos are yours to
   source. Use only images you have the rights to, and log them in the
   `SOURCES.txt` files.
+- **This repo's code and docs:** [MIT](LICENSE). The licence covers this
+  repo only, not the downloaded animations (CC0) or ActionForge's app.
